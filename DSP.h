@@ -34,13 +34,14 @@ public:
       }
       else
       {
-        if (m_dPrevAmplitude < 0)
+        if (dAmp < 0.0)
         {
+          // TODO: Make voice dormant
           return 0.0;
         }
       }
 
-      return dAmp;
+      return dAmp * m_dVel;
     }
 
     void Start(int noteNum, double velocity, double time)
@@ -74,7 +75,7 @@ public:
 public:
   DSP()
   {
-    //NoteOn(64, 1.0, 0);
+    NoteOn(64, 1.0, 0);
   }
 
   double Process(double time)
@@ -90,7 +91,7 @@ public:
         for (int k = 0; k < NUM_OSCILLATORS; k++)
         {
           if (osc[k].m_bActive)
-            out += osc[k].Process(voices[i].m_dFreq, time) * osc[k].m_dGain * dAmp;
+            out += osc[k].Process(voices[i].m_dFreq * osc[k].m_dFreqMultiplier, time) * osc[k].m_dGain * dAmp;
         }
       }
     }
@@ -143,6 +144,22 @@ public:
 
     case kOsc2Gain:
       osc[1].m_dGain = value / 100.0;
+      break;
+
+    case kOsc1OffsetOctave:
+      if (abs(value) < 0.01)
+        osc[0].m_dFreqMultiplier = 1;
+      else
+        osc[0].m_dFreqMultiplier = pow(2.0, value);
+
+      break;
+
+    case kOsc2OffsetOctave:
+      if (abs(value) < 0.01)
+        osc[1].m_dFreqMultiplier = 1;
+      else
+        osc[1].m_dFreqMultiplier = pow(2.0, value);
+
       break;
 
     case kEnvAttack:

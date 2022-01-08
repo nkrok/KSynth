@@ -15,6 +15,8 @@ KSynth::KSynth(const InstanceInfo& info)
   GetParam(kOsc2WaveType)->InitEnum("Osc 2 Wavetype", 1, { WAVE_TYPE_NAMES });
   GetParam(kOsc1Gain)->InitDouble("Osc 1 Gain", 100.0, 0.0, 100.0, 0.01);
   GetParam(kOsc2Gain)->InitDouble("Osc 2 Gain", 0.0, 0.0, 100.0, 0.01);
+  GetParam(kOsc1OffsetOctave)->InitInt("Osc 1 Octave Offset", 0, -3, 3);
+  GetParam(kOsc2OffsetOctave)->InitInt("Osc 2 Octave Offset", 0, -3, 3);
 
   GetParam(kEnvAttack)->InitDouble("Env Attack", 0.0, 0.0, 5.0, 0.01);
   GetParam(kEnvDecay)->InitDouble("Env Decay", 1.0, 0.0, 5.0, 0.01);
@@ -52,6 +54,10 @@ KSynth::KSynth(const InstanceInfo& info)
     pGraphics->AttachControl(new IBSwitchControl(158, 118, bmpWaveTypePanel, kOsc2WaveType));
     pGraphics->AttachControl(new IBKnobRotaterControl(30, 80, bmpKnob, kOsc1Gain));
     pGraphics->AttachControl(new IBKnobRotaterControl(180, 80, bmpKnob, kOsc2Gain));
+    pGraphics->AttachControl(new IBKnobRotaterControl(8, 140, bmpKnob, kOsc1OffsetOctave));
+    AddText(pGraphics, 62, 155, DEFAULT_TEXT, "Octave");
+    pGraphics->AttachControl(new IBKnobRotaterControl(158, 140, bmpKnob, kOsc2OffsetOctave));
+    AddText(pGraphics, 212, 155, DEFAULT_TEXT, "Octave");
 
     // ADSR parameters
     pGraphics->AttachControl(new IBKnobRotaterControl(8, PLUG_HEIGHT - 52, bmpKnob, kEnvAttack));
@@ -116,7 +122,7 @@ void KSynth::ProcessMidiMsg(const IMidiMsg& msg)
     int velocity = msg.Velocity();
 
     if (status == IMidiMsg::kNoteOn && velocity) {
-      mDSP.NoteOn(msg.NoteNumber(), velocity, m_dGlobalTime);
+      mDSP.NoteOn(msg.NoteNumber(), velocity / 127.0, m_dGlobalTime);
     }
     else {
       mDSP.NoteOff(msg.NoteNumber(), m_dGlobalTime);

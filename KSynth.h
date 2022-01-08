@@ -14,9 +14,7 @@ enum EParams
   kOsc1Gain,
   kOsc2Gain,
   kOsc1OffsetOctave,
-  kOsc1OffsetSemitones,
   kOsc2OffsetOctave,
-  kOsc2OffsetSemitones,
 
   kEnvAttack,
   kEnvDecay,

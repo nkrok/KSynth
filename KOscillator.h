@@ -54,6 +54,5 @@ public:
   double m_dGain;
   WaveType m_waveType;
 
-  int m_iOffsetOctave = 0;
-  int m_iOffsetSemitones = 0;
+  double m_dFreqMultiplier;
 };
