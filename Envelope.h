@@ -18,7 +18,7 @@ public:
 
   void SetDecay(double value)
   {
-    m_dDecay = value;
+    m_dDecay = value + 0.01; // Add 0.01 to decay so we're never dividing by zero during GetAmplitude()
   }
 
   void SetSustain(double value)

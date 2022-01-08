@@ -14,6 +14,7 @@ public:
   public:
     Voice()
     {
+      m_bDormant = true;
       m_bActive = false;
       m_iNoteNum = 69;
       m_dFreq = 440.0;
@@ -34,9 +35,9 @@ public:
       }
       else
       {
-        if (dAmp < 0.0)
+        if (dAmp < 0.001)
         {
-          // TODO: Make voice dormant
+          m_bDormant = true;
           return 0.0;
         }
       }
@@ -46,6 +47,7 @@ public:
 
     void Start(int noteNum, double velocity, double time)
     {
+      m_bDormant = false;
       m_iNoteNum = noteNum;
       m_dFreq = 440.0 * pow(2.0, (noteNum - 69) / 12.0);
       m_bActive = true;
@@ -62,6 +64,7 @@ public:
     }
 
   public:
+    bool m_bDormant;
     int m_iNoteNum;
     bool m_bActive;
     double m_dFreq;
@@ -84,6 +87,9 @@ public:
 
     for (int i = 0; i < NUM_VOICES; i++)
     {
+      if (voices[i].m_bDormant)
+        continue;
+
       double dAmp = voices[i].GetAmplitude(time, envelope);
 
       if (dAmp > 0.01)
@@ -131,11 +137,11 @@ public:
       break;
 
     case kOsc1WaveType:
-      osc[0].m_waveType = static_cast<WaveType>(value);
+      osc[0].SetWaveType(static_cast<WaveType>(value));
       break;
 
     case kOsc2WaveType:
-      osc[1].m_waveType = static_cast<WaveType>(value);
+      osc[1].SetWaveType(static_cast<WaveType>(value));
       break;
 
     case kOsc1Gain:

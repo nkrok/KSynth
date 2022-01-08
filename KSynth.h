@@ -1,6 +1,7 @@
 #pragma once
 
 #include "IPlug_include_in_plug_hdr.h"
+#include "IControls.h"
 
 const int kNumPresets = 1;
 
@@ -28,6 +29,12 @@ enum EParams
 #include "DSP.h"
 #endif
 
+enum EControlTags
+{
+  kCtrlTagMeter = 0,
+  kNumCtrlTags
+};
+
 using namespace iplug;
 using namespace igraphics;
 
@@ -44,6 +51,7 @@ public:
 #if IPLUG_DSP // http://bit.ly/2S64BDd
 public:
   void ProcessBlock(sample** inputs, sample** outputs, int nFrames) override;
+  void OnIdle() override;
   void ProcessMidiMsg(const IMidiMsg& msg) override;
   void OnReset() override;
   void OnParamChange(int paramIdx) override;
@@ -53,6 +61,7 @@ private:
   double m_dGlobalTime;
 
   DSP mDSP;
+  IPeakSender<2> mMeterSender;
 #endif
 
 #if IPLUG_EDITOR

@@ -45,6 +45,8 @@ KSynth::KSynth(const InstanceInfo& info)
     pGraphics->AttachControl(new IBKnobRotaterControl(8, 8, bmpKnob, kGain));
     AddText(pGraphics, 24, 46, TEXT_LIGHT, "Gain");
 
+    pGraphics->AttachControl(new IVLEDMeterControl<2>(IRECT(PLUG_WIDTH - 30, 64, PLUG_WIDTH - 22, 128)), kCtrlTagMeter);
+
     // Oscillator parameters
     pGraphics->AttachControl(new IBSwitchControl(8, 88, bmpButtonToggle, kOsc1Enabled));
     AddText(pGraphics, 26, 70, TEXT_LIGHT_MED, "Osc 1");
@@ -98,6 +100,13 @@ void KSynth::ProcessBlock(sample** inputs, sample** outputs, int nFrames)
 
     m_dGlobalTime += (1.0 / m_iSampleRate);
   }
+
+  mMeterSender.ProcessBlock(outputs, nFrames, kCtrlTagMeter);
+}
+
+void KSynth::OnIdle()
+{
+  mMeterSender.TransmitData(*this);
 }
 
 void KSynth::ProcessMidiMsg(const IMidiMsg& msg)
