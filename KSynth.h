@@ -31,6 +31,11 @@ enum EParams
 using namespace iplug;
 using namespace igraphics;
 
+#if IPLUG_EDITOR
+const IText TEXT_LIGHT = IText(DEFAULT_TEXT_SIZE, COLOR_LIGHT_GRAY);
+const IText TEXT_LIGHT_MED = IText(18.0F, COLOR_LIGHT_GRAY);
+#endif
+
 class KSynth final : public Plugin
 {
 public:

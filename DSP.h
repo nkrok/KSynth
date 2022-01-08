@@ -75,7 +75,7 @@ public:
 public:
   DSP()
   {
-    NoteOn(64, 1.0, 0);
+    //NoteOn(64, 0.5, 0);
   }
 
   double Process(double time)
