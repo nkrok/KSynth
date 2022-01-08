@@ -40,22 +40,40 @@ KSynth::KSynth(const InstanceInfo& info)
 
     /* Attach controls */
 
-    pGraphics->AttachControl(new IBKnobRotaterControl(8, 12, bmpKnob, kGain));
+    pGraphics->AttachControl(new IBKnobRotaterControl(8, 8, bmpKnob, kGain));
+    AddText(pGraphics, 24, 46, DEFAULT_TEXT, "Gain");
 
-    pGraphics->AttachControl(new IBSwitchControl(8, 74, bmpButtonToggle, kOsc1Enabled));
-    pGraphics->AttachControl(new IBSwitchControl(158, 74, bmpButtonToggle, kOsc2Enabled));
+    // Oscillator parameters
+    pGraphics->AttachControl(new IBSwitchControl(8, 88, bmpButtonToggle, kOsc1Enabled));
+    AddText(pGraphics, 26, 70, IText(18.0F), "Osc 1");
+    pGraphics->AttachControl(new IBSwitchControl(158, 88, bmpButtonToggle, kOsc2Enabled));
+    AddText(pGraphics, 176, 70, IText(18.0F), "Osc 2");
     pGraphics->AttachControl(new IBSwitchControl(8, 118, bmpWaveTypePanel, kOsc1WaveType));
     pGraphics->AttachControl(new IBSwitchControl(158, 118, bmpWaveTypePanel, kOsc2WaveType));
-    pGraphics->AttachControl(new IBKnobRotaterControl(30, 70, bmpKnob, kOsc1Gain));
-    pGraphics->AttachControl(new IBKnobRotaterControl(180, 70, bmpKnob, kOsc2Gain));
+    pGraphics->AttachControl(new IBKnobRotaterControl(30, 80, bmpKnob, kOsc1Gain));
+    pGraphics->AttachControl(new IBKnobRotaterControl(180, 80, bmpKnob, kOsc2Gain));
 
-    pGraphics->AttachControl(new IBKnobRotaterControl(8, PLUG_HEIGHT - 40, bmpKnob, kEnvAttack));
-    pGraphics->AttachControl(new IBKnobRotaterControl(44, PLUG_HEIGHT - 40, bmpKnob, kEnvDecay));
-    pGraphics->AttachControl(new IBKnobRotaterControl(80, PLUG_HEIGHT - 40, bmpKnob, kEnvSustain));
-    pGraphics->AttachControl(new IBKnobRotaterControl(116, PLUG_HEIGHT - 40, bmpKnob, kEnvRelease));
+    // ADSR parameters
+    pGraphics->AttachControl(new IBKnobRotaterControl(8, PLUG_HEIGHT - 52, bmpKnob, kEnvAttack));
+    AddText(pGraphics, 24, PLUG_HEIGHT - 13, DEFAULT_TEXT, "A");
+    pGraphics->AttachControl(new IBKnobRotaterControl(44, PLUG_HEIGHT - 52, bmpKnob, kEnvDecay));
+    AddText(pGraphics, 60, PLUG_HEIGHT - 13, DEFAULT_TEXT, "D");
+    pGraphics->AttachControl(new IBKnobRotaterControl(80, PLUG_HEIGHT - 52, bmpKnob, kEnvSustain));
+    AddText(pGraphics, 96, PLUG_HEIGHT - 13, DEFAULT_TEXT, "S");
+    pGraphics->AttachControl(new IBKnobRotaterControl(116, PLUG_HEIGHT - 52, bmpKnob, kEnvRelease));
+    AddText(pGraphics, 132, PLUG_HEIGHT - 13, DEFAULT_TEXT, "R");
   };
 #endif
 }
+
+#if IPLUG_EDITOR
+void KSynth::AddText(IGraphics* pGraphics, int x, int y, IText textProps, char* cString)
+{
+  IRECT rect(x, y, x, y);
+  pGraphics->MeasureText(textProps, cString, rect);
+  pGraphics->AttachControl(new ITextControl(rect, cString, textProps));
+}
+#endif
 
 #if IPLUG_DSP
 void KSynth::ProcessBlock(sample** inputs, sample** outputs, int nFrames)

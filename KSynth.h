@@ -51,4 +51,9 @@ private:
 
   DSP mDSP;
 #endif
+
+#if IPLUG_EDITOR
+public:
+  void AddText(IGraphics* pGraphics, int x, int y, IText textProps, char* cString);
+#endif
 };
