@@ -45,6 +45,7 @@ KSynth::KSynth(const InstanceInfo& info)
     pGraphics->AttachControl(new IBKnobRotaterControl(8, 8, bmpKnob, kGain));
     AddText(pGraphics, 24, 46, TEXT_LIGHT, "Gain");
 
+    // Volume meter
     pGraphics->AttachControl(new IVLEDMeterControl<2>(IRECT(PLUG_WIDTH - 30, 64, PLUG_WIDTH - 22, 128)), kCtrlTagMeter);
 
     // Oscillator parameters
@@ -101,6 +102,7 @@ void KSynth::ProcessBlock(sample** inputs, sample** outputs, int nFrames)
     m_dGlobalTime += (1.0 / m_iSampleRate);
   }
 
+  // Send output to volume meter
   mMeterSender.ProcessBlock(outputs, nFrames, kCtrlTagMeter);
 }
 

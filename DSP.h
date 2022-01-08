@@ -3,6 +3,7 @@
 #define NUM_VOICES 16
 #define NUM_OSCILLATORS 2
 
+#include "KLFO.h"
 #include "KOscillator.h"
 #include "Envelope.h"
 
@@ -87,17 +88,17 @@ public:
 
     for (int i = 0; i < NUM_VOICES; i++)
     {
-      if (voices[i].m_bDormant)
+      if (m_voices[i].m_bDormant)
         continue;
 
-      double dAmp = voices[i].GetAmplitude(time, envelope);
+      double dAmp = m_voices[i].GetAmplitude(time, m_envelope);
 
       if (dAmp > 0.01)
       {
         for (int k = 0; k < NUM_OSCILLATORS; k++)
         {
-          if (osc[k].m_bActive)
-            out += osc[k].Process(voices[i].m_dFreq * osc[k].m_dFreqMultiplier, time) * osc[k].m_dGain * dAmp;
+          if (m_osc[k].m_bActive)
+            out += m_osc[k].Process(m_voices[i].m_dFreq, time, m_LFO) * m_osc[k].m_dGain * dAmp;
         }
       }
     }
@@ -107,19 +108,19 @@ public:
 
   void NoteOn(int noteNum, double velocity, double time)
   {
-    voices[nextVoice].Start(noteNum, velocity, time);
-    nextVoice++;
+    m_voices[m_iNextVoice].Start(noteNum, velocity, time);
+    m_iNextVoice++;
 
-    if (nextVoice >= NUM_VOICES) nextVoice = 0;
+    if (m_iNextVoice >= NUM_VOICES) m_iNextVoice = 0;
   }
 
   void NoteOff(int noteNum, double time)
   {
     for (int i = 0; i < NUM_VOICES; i++)
     {
-      if (voices[i].m_iNoteNum == noteNum)
+      if (m_voices[i].m_iNoteNum == noteNum)
       {
-        voices[i].Release(time);
+        m_voices[i].Release(time);
       }
     }
   }
@@ -129,67 +130,68 @@ public:
     switch (paramIdx)
     {
     case kOsc1Enabled:
-      osc[0].m_bActive = (value == 1) ? true : false;
+      m_osc[0].m_bActive = (value == 1) ? true : false;
       break;
 
     case kOsc2Enabled:
-      osc[1].m_bActive = (value == 1) ? true : false;
+      m_osc[1].m_bActive = (value == 1) ? true : false;
       break;
 
     case kOsc1WaveType:
-      osc[0].SetWaveType(static_cast<WaveType>(value));
+      m_osc[0].SetWaveType(static_cast<WaveType>(value));
       break;
 
     case kOsc2WaveType:
-      osc[1].SetWaveType(static_cast<WaveType>(value));
+      m_osc[1].SetWaveType(static_cast<WaveType>(value));
       break;
 
     case kOsc1Gain:
-      osc[0].m_dGain = value / 100.0;
+      m_osc[0].m_dGain = value / 100.0;
       break;
 
     case kOsc2Gain:
-      osc[1].m_dGain = value / 100.0;
+      m_osc[1].m_dGain = value / 100.0;
       break;
 
     case kOsc1OffsetOctave:
       if (abs(value) < 0.01)
-        osc[0].m_dFreqMultiplier = 1;
+        m_osc[0].m_dFreqMultiplier = 1;
       else
-        osc[0].m_dFreqMultiplier = pow(2.0, value);
+        m_osc[0].m_dFreqMultiplier = pow(2.0, value);
 
       break;
 
     case kOsc2OffsetOctave:
       if (abs(value) < 0.01)
-        osc[1].m_dFreqMultiplier = 1;
+        m_osc[1].m_dFreqMultiplier = 1;
       else
-        osc[1].m_dFreqMultiplier = pow(2.0, value);
+        m_osc[1].m_dFreqMultiplier = pow(2.0, value);
 
       break;
 
     case kEnvAttack:
-      envelope.SetAttack(value);
+      m_envelope.SetAttack(value);
       break;
 
     case kEnvDecay:
-      envelope.SetDecay(value);
+      m_envelope.SetDecay(value);
       break;
 
     case kEnvSustain:
-      envelope.SetSustain(value / 100.0);
+      m_envelope.SetSustain(value / 100.0);
       break;
 
     case kEnvRelease:
-      envelope.SetRelease(value);
+      m_envelope.SetRelease(value);
       break;
     }
   }
 
 private:
-  Voice voices[NUM_VOICES];
-  int nextVoice = 0;
+  Voice m_voices[NUM_VOICES];
+  int m_iNextVoice = 0;
 
-  KOscillator osc[NUM_OSCILLATORS];
-  Envelope envelope;
+  KOscillator m_osc[NUM_OSCILLATORS];
+  Envelope m_envelope;
+  LFO m_LFO;
 };

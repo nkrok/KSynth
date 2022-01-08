@@ -26,8 +26,20 @@ public:
     m_dFreqMultiplier = 1.0;
   }
 
-  double Process(double freq, double time)
+  double Process(double freq, double time, LFO &lfo)
   {
+    freq *= m_dFreqMultiplier;
+
+    if (lfo.m_bEnabled)
+    {
+      if (lfo.m_mode == LFOMode::LFO_VOLUME)
+      {
+        double out = m_oscFunc(freq, time);
+        double volOsc = OscSin(lfo.m_dFreq, time) * lfo.m_dAmplitude;
+        return out - out * abs(volOsc);
+      }
+    }
+
     return m_oscFunc(freq, time);
   }
 
