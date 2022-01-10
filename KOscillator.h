@@ -101,6 +101,20 @@ public:
   double Process(Voice &voice, int sampleRate, double time, LFO &lfo)
   {
     double out;
+    double freq = voice.m_dFreq * m_dFreqMultiplier;
+    double volOsc = 0.0;
+
+    if (lfo.m_bEnabled)
+    {
+      if (lfo.m_mode == LFOMode::LFO_PITCH)
+      {
+        freq *= pow(2.0, OscSin(lfo.m_dFreq, time) * lfo.m_dAmplitude);
+      }
+      else if (lfo.m_mode == LFOMode::LFO_VOLUME)
+      {
+        volOsc = abs(OscSin(lfo.m_dFreq, time) * lfo.m_dAmplitude);
+      }
+    }
 
     if (m_waveType == WaveType::NOISE)
     {
@@ -108,9 +122,6 @@ public:
     }
     else
     {
-      double freq = voice.m_dFreq;
-      freq *= m_dFreqMultiplier;
-
       double increment = freq * m_wavetable->m_iWavetableSize / sampleRate;
       double phase = voice.m_dPhase[m_iOscID];
       voice.m_dPhase[m_iOscID] = std::fmod(phase + increment, m_wavetable->m_iWavetableSize);
@@ -118,14 +129,7 @@ public:
       out = m_wavetable->GetWavetable()[(int)phase];
     }
 
-    if (lfo.m_bEnabled)
-    {
-      if (lfo.m_mode == LFOMode::LFO_VOLUME)
-      {
-        double volOsc = OscSin(lfo.m_dFreq, time) * lfo.m_dAmplitude;
-        out -= out * abs(volOsc);
-      }
-    }
+    out -= out * volOsc;
 
     return out;
   }

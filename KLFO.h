@@ -1,5 +1,7 @@
 #pragma once
 
+#define LFO_MODE_NAMES "volume", "pitch"
+
 enum class LFOMode
 {
   LFO_VOLUME,
@@ -11,10 +13,10 @@ class LFO
 public:
   LFO()
   {
-    m_mode = LFOMode::LFO_PITCH;
+    m_mode = LFOMode::LFO_VOLUME;
     m_bEnabled = false;
-    m_dAmplitude = 0.01;
-    m_dFreq = 3.0;
+    m_dAmplitude = 0.0;
+    m_dFreq = 0.0;
   }
 
 public:

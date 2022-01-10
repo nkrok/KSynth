@@ -22,6 +22,11 @@ enum EParams
   kEnvSustain,
   kEnvRelease,
 
+  kLFOEnabled,
+  kLFOMode,
+  kLFOAmp,
+  kLFORate,
+
   kNumParams
 };
 

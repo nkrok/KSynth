@@ -11,7 +11,7 @@ KSynth::KSynth(const InstanceInfo& info)
 
   GetParam(kOsc1Enabled)->InitBool("Osc 1 Enabled", true);
   GetParam(kOsc2Enabled)->InitBool("Osc 2 Enabled", false);
-  GetParam(kOsc1WaveType)->InitEnum("Osc 1 Wavetype", 0, {WAVE_TYPE_NAMES});
+  GetParam(kOsc1WaveType)->InitEnum("Osc 1 Wavetype", 0, { WAVE_TYPE_NAMES });
   GetParam(kOsc2WaveType)->InitEnum("Osc 2 Wavetype", 1, { WAVE_TYPE_NAMES });
   GetParam(kOsc1Gain)->InitDouble("Osc 1 Gain", 100.0, 0.0, 100.0, 0.01);
   GetParam(kOsc2Gain)->InitDouble("Osc 2 Gain", 0.0, 0.0, 100.0, 0.01);
@@ -22,6 +22,11 @@ KSynth::KSynth(const InstanceInfo& info)
   GetParam(kEnvDecay)->InitDouble("Env Decay", 1.0, 0.0, 5.0, 0.01);
   GetParam(kEnvSustain)->InitDouble("Env Sustain", 100.0, 0.0, 100.0, 0.01);
   GetParam(kEnvRelease)->InitDouble("Env Release", 0.0, 0.0, 5.0, 0.01);
+
+  GetParam(kLFOEnabled)->InitBool("LFO Enabled", false);
+  GetParam(kLFOMode)->InitEnum("LFO Mode", 0, { LFO_MODE_NAMES });
+  GetParam(kLFOAmp)->InitDouble("LFO Amplitude", 0.0, 0.0, 100.0, 0.01);
+  GetParam(kLFORate)->InitDouble("LFO Rate", 0.0, 0.0, 20.0, 0.01);
 
 #if IPLUG_EDITOR // http://bit.ly/2S64BDd
   mMakeGraphicsFunc = [&]() {
@@ -39,6 +44,7 @@ KSynth::KSynth(const InstanceInfo& info)
     const IBitmap bmpWaveTypePanel = pGraphics->LoadBitmap(PNG_WAVETYPES, 5);
     const IBitmap bmpKnob = pGraphics->LoadBitmap(PNG_KNOB);
     const IBitmap bmpButtonToggle = pGraphics->LoadBitmap(PNG_BUTTON_TOGGLE, 2);
+    const IBitmap bmpLFOStates = pGraphics->LoadBitmap(PNG_LFO_STATES, 2);
 
     /* Attach controls */
 
@@ -63,6 +69,7 @@ KSynth::KSynth(const InstanceInfo& info)
     AddText(pGraphics, 212, 155, TEXT_LIGHT, "Octave");
 
     // ADSR parameters
+    AddText(pGraphics, 36, PLUG_HEIGHT - 64, TEXT_LIGHT_MED, "Envelope");
     pGraphics->AttachControl(new IBKnobRotaterControl(8, PLUG_HEIGHT - 52, bmpKnob, kEnvAttack));
     AddText(pGraphics, 24, PLUG_HEIGHT - 13, TEXT_LIGHT, "A");
     pGraphics->AttachControl(new IBKnobRotaterControl(44, PLUG_HEIGHT - 52, bmpKnob, kEnvDecay));
@@ -71,6 +78,15 @@ KSynth::KSynth(const InstanceInfo& info)
     AddText(pGraphics, 96, PLUG_HEIGHT - 13, TEXT_LIGHT, "S");
     pGraphics->AttachControl(new IBKnobRotaterControl(116, PLUG_HEIGHT - 52, bmpKnob, kEnvRelease));
     AddText(pGraphics, 132, PLUG_HEIGHT - 13, TEXT_LIGHT, "R");
+
+    // LFO parameters
+    AddText(pGraphics, 22, PLUG_HEIGHT - 174, TEXT_LIGHT_MED, "LFO");
+    pGraphics->AttachControl(new IBSwitchControl(10, PLUG_HEIGHT - 154, bmpButtonToggle, kLFOEnabled));
+    pGraphics->AttachControl(new IBSwitchControl(32, PLUG_HEIGHT - 158, bmpLFOStates, kLFOMode));
+    pGraphics->AttachControl(new IBKnobRotaterControl(8, PLUG_HEIGHT - 128, bmpKnob, kLFOAmp));
+    AddText(pGraphics, 24, PLUG_HEIGHT - 90, TEXT_LIGHT, "Amp");
+    pGraphics->AttachControl(new IBKnobRotaterControl(44, PLUG_HEIGHT - 128, bmpKnob, kLFORate));
+    AddText(pGraphics, 60, PLUG_HEIGHT - 90, TEXT_LIGHT, "Rate");
   };
 #endif
 }

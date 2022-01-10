@@ -59,3 +59,4 @@
 #define PNG_WAVETYPES "wavetypes.png"
 #define PNG_BUTTON_TOGGLE "button_toggle.png"
 #define PNG_KNOB "knob.png"
+#define PNG_LFO_STATES "lfo_states.png"

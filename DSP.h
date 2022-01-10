@@ -121,6 +121,22 @@ public:
     case kEnvRelease:
       m_envelope.SetRelease(value);
       break;
+
+    case kLFOEnabled:
+      m_LFO.m_bEnabled = (value == 1) ? true : false;
+      break;
+
+    case kLFOMode:
+      m_LFO.m_mode = static_cast<LFOMode>(value);
+      break;
+
+    case kLFOAmp:
+      m_LFO.m_dAmplitude = value / 100.0;
+      break;
+
+    case kLFORate:
+      m_LFO.m_dFreq = value;
+      break;
     }
   }
 
