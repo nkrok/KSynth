@@ -1,6 +1,6 @@
 #pragma once
 
-const double TWOPI = 4.0 * acos(0);
+#include "Wavetable.h"
 
 using namespace iplug;
 
@@ -15,32 +15,119 @@ enum class WaveType {
   NUM_WAVE_TYPES
 };
 
+class Voice
+{
+public:
+  Voice()
+  {
+    m_bDormant = true;
+    m_bActive = false;
+    m_iNoteNum = 69;
+    m_dFreq = 440.0;
+    m_dVel = 0.0;
+
+    for (int i = 0; i < NUM_OSCILLATORS; i++)
+      m_dPhase[i] = 0.0;
+
+    m_dTriggerOnTime = 0.0;
+    m_dActiveTime = 0.0;
+    m_dPrevAmplitude = 0.0;
+  }
+
+  double GetAmplitude(double time, Envelope& env) {
+    double dAmp = env.GetAmplitude(m_bActive, m_dActiveTime, time - m_dTriggerOnTime - m_dActiveTime, m_dPrevAmplitude);
+
+    if (m_bActive)
+    {
+      m_dActiveTime = time - m_dTriggerOnTime;
+      m_dPrevAmplitude = dAmp;
+    }
+    else
+    {
+      if (dAmp < 0.001)
+      {
+        m_bDormant = true;
+        return 0.0;
+      }
+    }
+
+    return dAmp * m_dVel;
+  }
+
+  void Start(int noteNum, double velocity, double time)
+  {
+    m_bDormant = false;
+    m_iNoteNum = noteNum;
+    m_dFreq = 440.0 * pow(2.0, (noteNum - 69) / 12.0);
+    m_bActive = true;
+    m_dVel = velocity;
+
+    for (int i = 0; i < NUM_OSCILLATORS; i++)
+      m_dPhase[i] = 0.0;
+
+    m_dTriggerOnTime = time;
+    m_dActiveTime = 0.0;
+    m_dPrevAmplitude = 0.0;
+  }
+
+  void Release(double time)
+  {
+    m_bActive = false;
+  }
+
+public:
+  bool m_bDormant;
+  int m_iNoteNum;
+  bool m_bActive;
+  double m_dFreq;
+  double m_dPhase[NUM_OSCILLATORS];
+  double m_dVel;
+
+  double m_dTriggerOnTime;
+  double m_dActiveTime;
+  double m_dPrevAmplitude;
+};
+
 class KOscillator
 {
 public:
   KOscillator()
   {
-    m_waveType = WaveType::SINE;
     m_bActive = false;
     m_dGain = 0.0;
     m_dFreqMultiplier = 1.0;
   }
 
-  double Process(double freq, double time, LFO &lfo)
+  double Process(Voice &voice, int sampleRate, double time, LFO &lfo)
   {
-    freq *= m_dFreqMultiplier;
+    double out;
+
+    if (m_waveType == WaveType::NOISE)
+    {
+      out = OscNoise();
+    }
+    else
+    {
+      double freq = voice.m_dFreq;
+      freq *= m_dFreqMultiplier;
+
+      double increment = freq * m_wavetable->m_iWavetableSize / sampleRate;
+      double phase = voice.m_dPhase[m_iOscID];
+      voice.m_dPhase[m_iOscID] = std::fmod(phase + increment, m_wavetable->m_iWavetableSize);
+
+      out = m_wavetable->GetWavetable()[(int)phase];
+    }
 
     if (lfo.m_bEnabled)
     {
       if (lfo.m_mode == LFOMode::LFO_VOLUME)
       {
-        double out = m_oscFunc(freq, time);
         double volOsc = OscSin(lfo.m_dFreq, time) * lfo.m_dAmplitude;
-        return out - out * abs(volOsc);
+        out -= out * abs(volOsc);
       }
     }
 
-    return m_oscFunc(freq, time);
+    return out;
   }
 
   double OscSin(double freq, double time)
@@ -48,64 +135,55 @@ public:
     return std::sin(TWOPI * freq * time);
   }
 
-  double OscSquare(double freq, double time)
-  {
-    return (std::sin(TWOPI * freq * time) > 0) ? 1.0 : -1.0;
-  }
-
-  double OscTriangle(double freq, double time)
-  {
-    return std::asin(std::sin(TWOPI * freq * time)) * (2.0 / PI);
-  }
-
-  double OscSaw(double freq, double time)
-  {
-    return (freq * PI * std::fmod(time, 1.0 / freq) - (PI / 2.0)) * (2.0 / PI);
-  }
-
-  double OscNoise(double freq, double time)
+  double OscNoise()
   {
     return 2.0 * ((double)std::rand() / RAND_MAX) - 1.0;
   }
 
-  void SetWaveType(WaveType type)
+  void SetWaveType(WaveType type, DefaultWavetables &wavetables)
   {
     m_waveType = type;
 
     switch (m_waveType)
     {
     case WaveType::SINE:
-      m_oscFunc = std::bind(&KOscillator::OscSin, this, std::placeholders::_1, std::placeholders::_2);
+      m_wavetable = &wavetables.GetSineWavetable();
       break;
 
     case WaveType::SQUARE:
-      m_oscFunc = std::bind(&KOscillator::OscSquare, this, std::placeholders::_1, std::placeholders::_2);
+      m_wavetable = &wavetables.GetSquareWavetable();
       break;
 
     case WaveType::TRIANGLE:
-      m_oscFunc = std::bind(&KOscillator::OscTriangle, this, std::placeholders::_1, std::placeholders::_2);
+      m_wavetable = &wavetables.GetTriangleWavetable();
       break;
 
     case WaveType::SAW:
-      m_oscFunc = std::bind(&KOscillator::OscSaw, this, std::placeholders::_1, std::placeholders::_2);
+      m_wavetable = &wavetables.GetSawWavetable();
       break;
 
     case WaveType::NOISE:
-      m_oscFunc = std::bind(&KOscillator::OscNoise, this, std::placeholders::_1, std::placeholders::_2);
+      m_wavetable = &wavetables.GetSineWavetable();
       break;
 
     default:
-      m_oscFunc = std::bind(&KOscillator::OscSin, this, std::placeholders::_1, std::placeholders::_2);
+      m_wavetable = &wavetables.GetSineWavetable();
       break;
     }
   }
 
+  Wavetable* GetWavetable()
+  {
+    return m_wavetable;
+  }
+
 public:
+  int m_iOscID;
   bool m_bActive;
   double m_dGain;
   double m_dFreqMultiplier;
 
 private:
   WaveType m_waveType;
-  std::function<double(double, double)> m_oscFunc;
+  Wavetable *m_wavetable;
 };

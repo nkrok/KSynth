@@ -150,6 +150,7 @@ void KSynth::ProcessMidiMsg(const IMidiMsg& msg)
 void KSynth::OnReset()
 {
   m_iSampleRate = GetSampleRate();
+  mDSP.SetSampleRate(m_iSampleRate);
   m_dGlobalTime = 0;
 }
 

@@ -331,6 +331,7 @@
     <ClInclude Include="..\KOscillator.h" />
     <ClInclude Include="..\KSynth.h" />
     <ClInclude Include="..\resources\resource.h" />
+    <ClInclude Include="..\Wavetable.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\..\Dependencies\IPlug\VST3_SDK\base\source\baseiids.cpp" />

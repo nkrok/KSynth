@@ -3,82 +3,22 @@
 #define NUM_VOICES 16
 #define NUM_OSCILLATORS 2
 
+const double TWOPI = 4.0 * acos(0);
+
+#include "Envelope.h"
 #include "KLFO.h"
 #include "KOscillator.h"
-#include "Envelope.h"
 
 class DSP
 {
 public:
-  class Voice
-  {
-  public:
-    Voice()
-    {
-      m_bDormant = true;
-      m_bActive = false;
-      m_iNoteNum = 69;
-      m_dFreq = 440.0;
-      m_dVel = 0.0;
-
-      m_dTriggerOnTime = 0.0;
-      m_dActiveTime = 0.0;
-      m_dPrevAmplitude = 0.0;
-    }
-
-    double GetAmplitude(double time, Envelope &env) {
-      double dAmp = env.GetAmplitude(m_bActive, m_dActiveTime, time - m_dTriggerOnTime - m_dActiveTime, m_dPrevAmplitude);
-
-      if (m_bActive)
-      {
-        m_dActiveTime = time - m_dTriggerOnTime;
-        m_dPrevAmplitude = dAmp;
-      }
-      else
-      {
-        if (dAmp < 0.001)
-        {
-          m_bDormant = true;
-          return 0.0;
-        }
-      }
-
-      return dAmp * m_dVel;
-    }
-
-    void Start(int noteNum, double velocity, double time)
-    {
-      m_bDormant = false;
-      m_iNoteNum = noteNum;
-      m_dFreq = 440.0 * pow(2.0, (noteNum - 69) / 12.0);
-      m_bActive = true;
-      m_dVel = velocity;
-
-      m_dTriggerOnTime = time;
-      m_dActiveTime = 0.0;
-      m_dPrevAmplitude = 0.0;
-    }
-
-    void Release(double time)
-    {
-      m_bActive = false;
-    }
-
-  public:
-    bool m_bDormant;
-    int m_iNoteNum;
-    bool m_bActive;
-    double m_dFreq;
-    double m_dVel;
-
-    double m_dTriggerOnTime;
-    double m_dActiveTime;
-    double m_dPrevAmplitude;
-  };
-
-public:
   DSP()
   {
+    for (int i = 0; i < NUM_OSCILLATORS; i++)
+    {
+      m_osc[i].m_iOscID = i;
+    }
+
     //NoteOn(64, 0.5, 0);
   }
 
@@ -93,13 +33,10 @@ public:
 
       double dAmp = m_voices[i].GetAmplitude(time, m_envelope);
 
-      if (dAmp > 0.01)
+      for (int k = 0; k < NUM_OSCILLATORS; k++)
       {
-        for (int k = 0; k < NUM_OSCILLATORS; k++)
-        {
-          if (m_osc[k].m_bActive)
-            out += m_osc[k].Process(m_voices[i].m_dFreq, time, m_LFO) * m_osc[k].m_dGain * dAmp;
-        }
+        if (m_osc[k].m_bActive)
+          out += m_osc[k].Process(m_voices[i], m_iSampleRate, time, m_LFO) * m_osc[k].m_dGain * dAmp;
       }
     }
 
@@ -138,11 +75,11 @@ public:
       break;
 
     case kOsc1WaveType:
-      m_osc[0].SetWaveType(static_cast<WaveType>(value));
+      m_osc[0].SetWaveType(static_cast<WaveType>(value), m_defaultWavetables);
       break;
 
     case kOsc2WaveType:
-      m_osc[1].SetWaveType(static_cast<WaveType>(value));
+      m_osc[1].SetWaveType(static_cast<WaveType>(value), m_defaultWavetables);
       break;
 
     case kOsc1Gain:
@@ -187,11 +124,18 @@ public:
     }
   }
 
+  void SetSampleRate(int rate)
+  {
+    m_iSampleRate = rate;
+  }
+
 private:
+  int m_iSampleRate = 44100;
   Voice m_voices[NUM_VOICES];
   int m_iNextVoice = 0;
 
   KOscillator m_osc[NUM_OSCILLATORS];
+  DefaultWavetables m_defaultWavetables;
   Envelope m_envelope;
   LFO m_LFO;
 };
