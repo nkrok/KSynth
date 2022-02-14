@@ -17,6 +17,8 @@ KSynth::KSynth(const InstanceInfo& info)
   GetParam(kOsc2Gain)->InitDouble("Osc 2 Gain", 0.0, 0.0, 100.0, 0.01);
   GetParam(kOsc1OffsetOctave)->InitInt("Osc 1 Octave Offset", 0, -3, 3);
   GetParam(kOsc2OffsetOctave)->InitInt("Osc 2 Octave Offset", 0, -3, 3);
+  GetParam(kOsc1Pan)->InitDouble("Osc 1 Panning", 0, -100.0, 100.0, 0.01);
+  GetParam(kOsc2Pan)->InitDouble("Osc 2 Panning", 0, -100.0, 100.0, 0.01);
 
   GetParam(kEnvAttack)->InitDouble("Env Attack", 0.0, 0.0, 5.0, 0.01);
   GetParam(kEnvDecay)->InitDouble("Env Decay", 1.0, 0.0, 5.0, 0.01);
@@ -49,27 +51,34 @@ KSynth::KSynth(const InstanceInfo& info)
     /* Attach controls */
 
     pGraphics->AttachControl(new IBKnobRotaterControl(8, 8, bmpKnob, kGain));
-    AddText(pGraphics, 24, 46, TEXT_LIGHT, "Gain");
+    AddText(pGraphics, 25, 46, TEXT_LIGHT, "Main");
 
     // Volume meter
     pGraphics->AttachControl(new IVLEDMeterControl<2>(IRECT(PLUG_WIDTH - 30, 64, PLUG_WIDTH - 22, 128)), kCtrlTagMeter);
 
     // Oscillator parameters
-    pGraphics->AttachControl(new IBSwitchControl(8, 88, bmpButtonToggle, kOsc1Enabled));
-    AddText(pGraphics, 26, 70, TEXT_LIGHT_MED, "Osc 1");
-    pGraphics->AttachControl(new IBSwitchControl(158, 88, bmpButtonToggle, kOsc2Enabled));
-    AddText(pGraphics, 176, 70, TEXT_LIGHT_MED, "Osc 2");
-    pGraphics->AttachControl(new IBSwitchControl(8, 118, bmpWaveTypePanel, kOsc1WaveType));
-    pGraphics->AttachControl(new IBSwitchControl(158, 118, bmpWaveTypePanel, kOsc2WaveType));
-    pGraphics->AttachControl(new IBKnobRotaterControl(30, 80, bmpKnob, kOsc1Gain));
-    pGraphics->AttachControl(new IBKnobRotaterControl(180, 80, bmpKnob, kOsc2Gain));
-    pGraphics->AttachControl(new IBKnobRotaterControl(8, 140, bmpKnob, kOsc1OffsetOctave));
-    AddText(pGraphics, 62, 155, TEXT_LIGHT, "Octave");
-    pGraphics->AttachControl(new IBKnobRotaterControl(158, 140, bmpKnob, kOsc2OffsetOctave));
-    AddText(pGraphics, 212, 155, TEXT_LIGHT, "Octave");
+    pGraphics->AttachControl(new IBSwitchControl(49, 63, bmpButtonToggle, kOsc1Enabled));
+    AddText(pGraphics, 30, 70, TEXT_LIGHT_MED, "Osc 1");
+    pGraphics->AttachControl(new IBSwitchControl(202, 63, bmpButtonToggle, kOsc2Enabled));
+    AddText(pGraphics, 178, 70, TEXT_LIGHT_MED, "Osc 2");
+    pGraphics->AttachControl(new IBSwitchControl(11, 136, bmpWaveTypePanel, kOsc1WaveType));
+    pGraphics->AttachControl(new IBSwitchControl(161, 136, bmpWaveTypePanel, kOsc2WaveType));
+    pGraphics->AttachControl(new IBKnobRotaterControl(10, 80, bmpKnob, kOsc1Gain));
+    AddText(pGraphics, 26, 120, TEXT_LIGHT, "Gain");
+    pGraphics->AttachControl(new IBKnobRotaterControl(158, 80, bmpKnob, kOsc2Gain));
+    AddText(pGraphics, 174, 120, TEXT_LIGHT, "Gain");
+    pGraphics->AttachControl(new IBKnobRotaterControl(46, 80, bmpKnob, kOsc1Pan));
+    AddText(pGraphics, 62, 120, TEXT_LIGHT, "Pan");
+    pGraphics->AttachControl(new IBKnobRotaterControl(194, 80, bmpKnob, kOsc2Pan));
+    AddText(pGraphics, 210, 120, TEXT_LIGHT, "Pan");
+    pGraphics->AttachControl(new IBKnobRotaterControl(8, 158, bmpKnob, kOsc1OffsetOctave));
+    AddText(pGraphics, 62, 173, TEXT_LIGHT, "Octave");
+    pGraphics->AttachControl(new IBKnobRotaterControl(158, 158, bmpKnob, kOsc2OffsetOctave));
+    AddText(pGraphics, 212, 173, TEXT_LIGHT, "Octave");
+
 
     // ADSR parameters
-    AddText(pGraphics, 36, PLUG_HEIGHT - 64, TEXT_LIGHT_MED, "Envelope");
+    AddText(pGraphics, 38, PLUG_HEIGHT - 64, TEXT_LIGHT_MED, "Envelope");
     pGraphics->AttachControl(new IBKnobRotaterControl(8, PLUG_HEIGHT - 52, bmpKnob, kEnvAttack));
     AddText(pGraphics, 24, PLUG_HEIGHT - 13, TEXT_LIGHT, "A");
     pGraphics->AttachControl(new IBKnobRotaterControl(44, PLUG_HEIGHT - 52, bmpKnob, kEnvDecay));
@@ -110,10 +119,10 @@ void KSynth::ProcessBlock(sample** inputs, sample** outputs, int nFrames)
 
   for (int s = 0; s < nFrames; ++s, ++out1, ++out2)
   {
-    double result = mDSP.Process(m_dGlobalTime) * gain;
+    double *result = mDSP.Process(m_dGlobalTime);
 
-    *out1 = result;
-    *out2 = result;
+    *out1 = result[0] * gain;
+    *out2 = result[1] * gain;
 
     m_dGlobalTime += (1.0 / m_iSampleRate);
   }
@@ -165,6 +174,7 @@ void KSynth::ProcessMidiMsg(const IMidiMsg& msg)
 
 void KSynth::OnReset()
 {
+  mDSP.StopAllVoices();
   m_iSampleRate = GetSampleRate();
   mDSP.SetSampleRate(m_iSampleRate);
   m_dGlobalTime = 0;

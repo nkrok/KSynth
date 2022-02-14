@@ -75,6 +75,15 @@ public:
     m_bActive = false;
   }
 
+  /*
+  * Forcefully stops a voice from making any noise
+  */
+  void Stop()
+  {
+    m_bDormant = true;
+    m_bActive = false;
+  }
+
 public:
   bool m_bDormant;
   int m_iNoteNum;
@@ -98,9 +107,9 @@ public:
     m_dFreqMultiplier = 1.0;
   }
 
-  double Process(Voice &voice, int sampleRate, double time, LFO &lfo)
+  double* Process(Voice &voice, int sampleRate, double time, LFO &lfo)
   {
-    double out;
+    double out[2];
     double freq = voice.m_dFreq * m_dFreqMultiplier;
     double volOsc = 0.0;
 
@@ -118,7 +127,7 @@ public:
 
     if (m_waveType == WaveType::NOISE)
     {
-      out = OscNoise();
+      out[0] = OscNoise();
     }
     else
     {
@@ -126,10 +135,15 @@ public:
       double phase = voice.m_dPhase[m_iOscID];
       voice.m_dPhase[m_iOscID] = std::fmod(phase + increment, m_wavetable->m_iWavetableSize);
 
-      out = m_wavetable->GetWavetable()[(int)phase];
+      out[0] = m_wavetable->GetWavetable()[(int)phase];
     }
 
-    out -= out * volOsc;
+    out[0] -= out[0] * volOsc;
+    out[1] = out[0] = out[0] * m_dGain;
+
+    // Apply panning
+    out[0] *= std::min(1.0, 1.0 - m_dPan);
+    out[1] *= std::min(1.0, 1.0 + m_dPan);
 
     return out;
   }
@@ -185,6 +199,7 @@ public:
   int m_iOscID;
   bool m_bActive;
   double m_dGain;
+  double m_dPan;
   double m_dFreqMultiplier;
 
 private:

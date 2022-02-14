@@ -27,6 +27,9 @@ enum EParams
   kLFOAmp,
   kLFORate,
 
+  kOsc1Pan,
+  kOsc2Pan,
+
   kNumParams
 };
 

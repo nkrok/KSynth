@@ -22,9 +22,9 @@ public:
     //NoteOn(64, 0.5, 0);
   }
 
-  double Process(double time)
+  double* Process(double time)
   {
-    double out = 0.0;
+    double out[2] = { 0.0 };
 
     for (int i = 0; i < NUM_VOICES; i++)
     {
@@ -36,7 +36,11 @@ public:
       for (int k = 0; k < NUM_OSCILLATORS; k++)
       {
         if (m_osc[k].m_bActive)
-          out += m_osc[k].Process(m_voices[i], m_iSampleRate, time, m_LFO) * m_osc[k].m_dGain * dAmp;
+        {
+          double *o = m_osc[k].Process(m_voices[i], m_iSampleRate, time, m_LFO);
+          out[0] += o[0] * dAmp;
+          out[1] += o[1] * dAmp;
+        }
       }
     }
 
@@ -59,6 +63,14 @@ public:
       {
         m_voices[i].Release(time);
       }
+    }
+  }
+
+  void StopAllVoices()
+  {
+    for (int i = 0; i < NUM_VOICES; i++)
+    {
+      m_voices[i].Stop();
     }
   }
 
@@ -88,6 +100,14 @@ public:
 
     case kOsc2Gain:
       m_osc[1].m_dGain = value / 100.0;
+      break;
+
+    case kOsc1Pan:
+      m_osc[0].m_dPan = value / 100.0;
+      break;
+
+    case kOsc2Pan:
+      m_osc[1].m_dPan = value / 100.0;
       break;
 
     case kOsc1OffsetOctave:
