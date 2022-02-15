@@ -19,6 +19,10 @@ KSynth::KSynth(const InstanceInfo& info)
   GetParam(kOsc2OffsetOctave)->InitInt("Osc 2 Octave Offset", 0, -3, 3);
   GetParam(kOsc1Pan)->InitDouble("Osc 1 Panning", 0, -100.0, 100.0, 0.01);
   GetParam(kOsc2Pan)->InitDouble("Osc 2 Panning", 0, -100.0, 100.0, 0.01);
+  GetParam(kOsc1UnisonAmount)->InitInt("Osc 1 Unison", 0, 0, MAX_UNISON - 1);
+  GetParam(kOsc2UnisonAmount)->InitInt("Osc 2 Unison", 0, 0, MAX_UNISON - 1);
+  GetParam(kOsc1UnisonDetune)->InitDouble("Osc 1 Detune", 0.0, 0.0, 100.0, 0.01);
+  GetParam(kOsc2UnisonDetune)->InitDouble("Osc 2 Detune", 0.0, 0.0, 100.0, 0.01);
 
   GetParam(kEnvAttack)->InitDouble("Env Attack", 0.0, 0.0, 5.0, 0.01);
   GetParam(kEnvDecay)->InitDouble("Env Decay", 1.0, 0.0, 5.0, 0.01);
@@ -75,6 +79,14 @@ KSynth::KSynth(const InstanceInfo& info)
     AddText(pGraphics, 62, 173, TEXT_LIGHT, "Octave");
     pGraphics->AttachControl(new IBKnobRotaterControl(158, 158, bmpKnob, kOsc2OffsetOctave));
     AddText(pGraphics, 212, 173, TEXT_LIGHT, "Octave");
+    pGraphics->AttachControl(new IBKnobRotaterControl(8, 194, bmpKnob, kOsc1UnisonAmount));
+    AddText(pGraphics, 62, 209, TEXT_LIGHT, "Unison");
+    pGraphics->AttachControl(new IBKnobRotaterControl(158, 194, bmpKnob, kOsc2UnisonAmount));
+    AddText(pGraphics, 212, 209, TEXT_LIGHT, "Unison");
+    pGraphics->AttachControl(new IBKnobRotaterControl(8, 230, bmpKnob, kOsc1UnisonDetune));
+    AddText(pGraphics, 62, 245, TEXT_LIGHT, "Detune");
+    pGraphics->AttachControl(new IBKnobRotaterControl(158, 230, bmpKnob, kOsc2UnisonDetune));
+    AddText(pGraphics, 212, 245, TEXT_LIGHT, "Detune");
 
 
     // ADSR parameters

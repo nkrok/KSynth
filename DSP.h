@@ -2,6 +2,7 @@
 
 #define NUM_VOICES 16
 #define NUM_OSCILLATORS 2
+#define MAX_UNISON 8
 
 const double TWOPI = 4.0 * acos(0);
 
@@ -37,9 +38,9 @@ public:
       {
         if (m_osc[k].m_bActive)
         {
-          double *o = m_osc[k].Process(m_voices[i], m_iSampleRate, time, m_LFO);
-          out[0] += o[0] * dAmp;
-          out[1] += o[1] * dAmp;
+          double *oscOut = m_osc[k].Process(m_voices[i], m_iSampleRate, time, m_LFO);
+          out[0] += oscOut[0] * dAmp;
+          out[1] += oscOut[1] * dAmp;
         }
       }
     }
@@ -124,6 +125,22 @@ public:
       else
         m_osc[1].m_dFreqMultiplier = pow(2.0, value);
 
+      break;
+
+    case kOsc1UnisonAmount:
+      m_osc[0].m_iUnisonAmount = value;
+      break;
+
+    case kOsc2UnisonAmount:
+      m_osc[1].m_iUnisonAmount = value;
+      break;
+
+    case kOsc1UnisonDetune:
+      m_osc[0].m_dUnisonDetune = value / 100;
+      break;
+
+    case kOsc2UnisonDetune:
+      m_osc[1].m_dUnisonDetune = value / 100;
       break;
 
     case kEnvAttack:

@@ -27,7 +27,8 @@ public:
     m_dVel = 0.0;
 
     for (int i = 0; i < NUM_OSCILLATORS; i++)
-      m_dPhase[i] = 0.0;
+      for (int k = 0; k < MAX_UNISON; k++)
+        m_dPhase[i][k] = 0.0;
 
     m_dTriggerOnTime = 0.0;
     m_dActiveTime = 0.0;
@@ -63,7 +64,8 @@ public:
     m_dVel = velocity;
 
     for (int i = 0; i < NUM_OSCILLATORS; i++)
-      m_dPhase[i] = 0.0;
+      for (int k = 0; k < MAX_UNISON; k++)
+        m_dPhase[i][k] = 0.0;
 
     m_dTriggerOnTime = time;
     m_dActiveTime = 0.0;
@@ -89,7 +91,7 @@ public:
   int m_iNoteNum;
   bool m_bActive;
   double m_dFreq;
-  double m_dPhase[NUM_OSCILLATORS];
+  double m_dPhase[NUM_OSCILLATORS][MAX_UNISON];
   double m_dVel;
 
   double m_dTriggerOnTime;
@@ -104,12 +106,16 @@ public:
   {
     m_bActive = false;
     m_dGain = 0.0;
+    m_dPan = 0.0;
     m_dFreqMultiplier = 1.0;
+
+    m_iUnisonAmount = 0;
+    m_dUnisonDetune = 0.0;
   }
 
   double* Process(Voice &voice, int sampleRate, double time, LFO &lfo)
   {
-    double out[2];
+    double out[2] = { 0.0 };
     double freq = voice.m_dFreq * m_dFreqMultiplier;
     double volOsc = 0.0;
 
@@ -127,23 +133,30 @@ public:
 
     if (m_waveType == WaveType::NOISE)
     {
-      out[0] = OscNoise();
+      out[1] = out[0] = OscNoise();
     }
     else
     {
-      double increment = freq * m_wavetable->m_iWavetableSize / sampleRate;
-      double phase = voice.m_dPhase[m_iOscID];
-      voice.m_dPhase[m_iOscID] = std::fmod(phase + increment, m_wavetable->m_iWavetableSize);
+      // Apply unison and detune
+      for (int i = 0; i < m_iUnisonAmount + 1; i++)
+      {
+        double unisonFreq = freq * pow(2.0, m_dUnisonDetune * (50.0 / std::max(1, m_iUnisonAmount) * i) / 1200.0);
+        double increment = unisonFreq * m_wavetable->m_iWavetableSize / sampleRate;
+        double phase = voice.m_dPhase[m_iOscID][i];
+        voice.m_dPhase[m_iOscID][i] = std::fmod(phase + increment, m_wavetable->m_iWavetableSize);
 
-      out[0] = m_wavetable->GetWavetable()[(int)phase];
+        double wtOut = m_wavetable->GetWavetable()[(int)phase];
+        out[0] += wtOut / (m_iUnisonAmount + 1);
+        out[1] += wtOut / (m_iUnisonAmount + 1);
+      }
     }
 
     out[0] -= out[0] * volOsc;
-    out[1] = out[0] = out[0] * m_dGain;
+    out[1] -= out[1] * volOsc;
 
-    // Apply panning
-    out[0] *= std::min(1.0, 1.0 - m_dPan);
-    out[1] *= std::min(1.0, 1.0 + m_dPan);
+    // Apply gain and panning
+    out[0] *= m_dGain * std::min(1.0, 1.0 - m_dPan);
+    out[1] *= m_dGain * std::min(1.0, 1.0 + m_dPan);
 
     return out;
   }
@@ -201,6 +214,9 @@ public:
   double m_dGain;
   double m_dPan;
   double m_dFreqMultiplier;
+
+  int m_iUnisonAmount;
+  double m_dUnisonDetune;
 
 private:
   WaveType m_waveType;

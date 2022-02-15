@@ -29,6 +29,10 @@ enum EParams
 
   kOsc1Pan,
   kOsc2Pan,
+  kOsc1UnisonAmount,
+  kOsc2UnisonAmount,
+  kOsc1UnisonDetune,
+  kOsc2UnisonDetune,
 
   kNumParams
 };
