@@ -24,15 +24,15 @@ KSynth::KSynth(const InstanceInfo& info)
   GetParam(kOsc1UnisonDetune)->InitDouble("Osc 1 Detune", 0.0, 0.0, 100.0, 0.01);
   GetParam(kOsc2UnisonDetune)->InitDouble("Osc 2 Detune", 0.0, 0.0, 100.0, 0.01);
 
-  GetParam(kEnvAttack)->InitDouble("Env Attack", 0.0, 0.0, 5.0, 0.01);
-  GetParam(kEnvDecay)->InitDouble("Env Decay", 1.0, 0.0, 5.0, 0.01);
-  GetParam(kEnvSustain)->InitDouble("Env Sustain", 100.0, 0.0, 100.0, 0.01);
-  GetParam(kEnvRelease)->InitDouble("Env Release", 0.0, 0.0, 5.0, 0.01);
+  GetParam(kEnvAttack)->InitDouble("Amp Env Attack", 0.0, 0.0, 5.0, 0.01);
+  GetParam(kEnvDecay)->InitDouble("Amp Env Decay", 1.0, 0.0, 5.0, 0.01);
+  GetParam(kEnvSustain)->InitDouble("Amp Env Sustain", 100.0, 0.0, 100.0, 0.01);
+  GetParam(kEnvRelease)->InitDouble("Amp Env Release", 0.0, 0.0, 5.0, 0.01);
 
-  GetParam(kLFOEnabled)->InitBool("LFO Enabled", false);
-  GetParam(kLFOMode)->InitEnum("LFO Mode", 0, { LFO_MODE_NAMES });
-  GetParam(kLFOAmp)->InitDouble("LFO Amplitude", 0.0, 0.0, 100.0, 0.01);
-  GetParam(kLFORate)->InitDouble("LFO Rate", 0.0, 0.0, 20.0, 0.01);
+  GetParam(kLFO1Enabled)->InitBool("LFO Enabled", false);
+  GetParam(kLFO1Mode)->InitEnum("LFO Mode", 0, { LFO_MODE_NAMES });
+  GetParam(kLFO1Amp)->InitDouble("LFO Amplitude", 0.0, 0.0, 100.0, 0.01);
+  GetParam(kLFO1Rate)->InitDouble("LFO Rate", 0.0, 0.0, 20.0, 0.01);
 
 #if IPLUG_EDITOR // http://bit.ly/2S64BDd
   mMakeGraphicsFunc = [&]() {
@@ -102,11 +102,11 @@ KSynth::KSynth(const InstanceInfo& info)
 
     // LFO parameters
     AddText(pGraphics, 22, PLUG_HEIGHT - 174, TEXT_LIGHT_MED, "LFO");
-    pGraphics->AttachControl(new IBSwitchControl(10, PLUG_HEIGHT - 154, bmpButtonToggle, kLFOEnabled));
-    pGraphics->AttachControl(new IBSwitchControl(32, PLUG_HEIGHT - 158, bmpLFOStates, kLFOMode));
-    pGraphics->AttachControl(new IBKnobRotaterControl(8, PLUG_HEIGHT - 128, bmpKnob, kLFOAmp));
+    pGraphics->AttachControl(new IBSwitchControl(10, PLUG_HEIGHT - 154, bmpButtonToggle, kLFO1Enabled));
+    pGraphics->AttachControl(new IBSwitchControl(32, PLUG_HEIGHT - 158, bmpLFOStates, kLFO1Mode));
+    pGraphics->AttachControl(new IBKnobRotaterControl(8, PLUG_HEIGHT - 128, bmpKnob, kLFO1Amp));
     AddText(pGraphics, 24, PLUG_HEIGHT - 90, TEXT_LIGHT, "Amp");
-    pGraphics->AttachControl(new IBKnobRotaterControl(44, PLUG_HEIGHT - 128, bmpKnob, kLFORate));
+    pGraphics->AttachControl(new IBKnobRotaterControl(44, PLUG_HEIGHT - 128, bmpKnob, kLFO1Rate));
     AddText(pGraphics, 60, PLUG_HEIGHT - 90, TEXT_LIGHT, "Rate");
   };
 #endif

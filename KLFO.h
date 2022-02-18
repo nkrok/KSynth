@@ -1,13 +1,5 @@
 #pragma once
 
-#define LFO_MODE_NAMES "volume", "pitch"
-
-enum class LFOMode
-{
-  LFO_VOLUME,
-  LFO_PITCH
-};
-
 class LFO
 {
 public:

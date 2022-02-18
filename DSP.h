@@ -3,12 +3,12 @@
 #define NUM_VOICES 16
 #define NUM_OSCILLATORS 2
 #define MAX_UNISON 4
+#define NUM_LFO 2
 
 const double TWOPI = 4.0 * acos(0);
 
 #include "Wavetable.h"
 #include "Envelope.h"
-#include "KLFO.h"
 #include "SynthParams.h"
 #include "Voice.h"
 
@@ -153,20 +153,20 @@ public:
       m_synthParams->ampEnv->SetRelease(value);
       break;
 
-    case kLFOEnabled:
-      //m_LFO.m_bEnabled = (value == 1) ? true : false;
+    case kLFO1Enabled:
+      m_synthParams->GetLFOParams(0)->m_bEnabled = (value == 1) ? true : false;
       break;
 
-    case kLFOMode:
-      //m_LFO.m_mode = static_cast<LFOMode>(value);
+    case kLFO1Mode:
+      m_synthParams->GetLFOParams(0)->m_mode = static_cast<LFOMode>(value);
       break;
 
-    case kLFOAmp:
-      //m_LFO.m_dAmplitude = value / 100.0;
+    case kLFO1Amp:
+      m_synthParams->GetLFOParams(0)->m_dAmplitude = value / 100.0;
       break;
 
-    case kLFORate:
-      //m_LFO.m_dFreq = value;
+    case kLFO1Rate:
+      m_synthParams->GetLFOParams(0)->m_dFreq = value;
       break;
     }
   }

@@ -5,23 +5,10 @@ using namespace iplug;
 class KOscillator
 {
 public:
-  double* Process(double inputFreq, int sampleRate, double time, LFO &lfo)
+  double* Process(double inputFreq, int sampleRate, double time)
   {
     double out[2] = { 0.0 };
     double freq = inputFreq * m_oscParams->m_dFreqMultiplier;
-    double volOsc = 0.0;
-
-    if (lfo.m_bEnabled)
-    {
-      if (lfo.m_mode == LFOMode::LFO_PITCH)
-      {
-        freq *= pow(2.0, OscSin(lfo.m_dFreq, time) * lfo.m_dAmplitude);
-      }
-      else if (lfo.m_mode == LFOMode::LFO_VOLUME)
-      {
-        volOsc = abs(OscSin(lfo.m_dFreq, time) * lfo.m_dAmplitude);
-      }
-    }
 
     if (m_oscParams->m_waveType == WaveType::NOISE)
     {
@@ -42,9 +29,6 @@ public:
         out[1] += wtOut / (m_oscParams->m_iUnisonAmount + 1);
       }
     }
-
-    out[0] -= out[0] * volOsc;
-    out[1] -= out[1] * volOsc;
 
     // Apply gain and panning
     out[0] *= m_oscParams->m_dGain * std::min(1.0, 1.0 - m_oscParams->m_dPan);

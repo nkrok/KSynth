@@ -26,16 +26,29 @@ public:
   double* Process(double time, int sampleRate)
   {
     double out[2] = { 0.0 };
+    double freq = m_dFreq;
     double dAmp = GetAmplitude(time);
 
-    // TODO: Do LFO here instead of in the oscillator
+    // LFO
+    if (m_LFOParams[0]->m_bEnabled)
+    {
+      if (m_LFOParams[0]->m_mode == LFOMode::LFO_PITCH)
+      {
+        freq *= pow(2.0, m_osc[0].OscSin(m_LFOParams[0]->m_dFreq, time) * m_LFOParams[0]->m_dAmplitude);
+      }
+      else if (m_LFOParams[0]->m_mode == LFOMode::LFO_VOLUME)
+      {
+        double volOsc = abs(m_osc[0].OscSin(m_LFOParams[0]->m_dFreq, time) * m_LFOParams[0]->m_dAmplitude);
+        dAmp -= dAmp * volOsc;
+      }
+    }
 
     for (int i = 0; i < NUM_OSCILLATORS; i++)
     {
       if (!m_synthParams->GetOscParams(i)->m_bActive)
         continue;
 
-      double* oscOut = m_osc[i].Process(m_dFreq, sampleRate, time, lfo);
+      double* oscOut = m_osc[i].Process(freq, sampleRate, time);
       out[0] += oscOut[0] * dAmp;
       out[1] += oscOut[1] * dAmp;
     }
@@ -98,6 +111,11 @@ public:
     {
       m_osc[i].SetOscParams(m_synthParams->GetOscParams(i));
     }
+
+    for (int i = 0; i < NUM_LFO; i++)
+    {
+      m_LFOParams[i] = params->GetLFOParams(i);
+    }
   }
 
 public:
@@ -113,6 +131,6 @@ public:
 
 private:
   std::shared_ptr<SynthParams> m_synthParams;
+  std::shared_ptr<LFOParams> m_LFOParams[NUM_LFO];
   KOscillator m_osc[NUM_OSCILLATORS];
-  LFO lfo;
 };

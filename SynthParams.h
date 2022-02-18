@@ -1,5 +1,13 @@
 #pragma once
 
+#define LFO_MODE_NAMES "volume", "pitch"
+
+enum class LFOMode
+{
+  LFO_VOLUME,
+  LFO_PITCH
+};
+
 class OscParams
 {
 public:
@@ -10,15 +18,24 @@ public:
   }
 
 public:
-  bool m_bActive;
-  double m_dGain;
-  double m_dPan;
-  double m_dFreqMultiplier;
-  int m_iUnisonAmount;
-  double m_dUnisonDetune;
+  bool m_bActive = false;
+  double m_dGain = 0.0;
+  double m_dPan = 0.0;
+  double m_dFreqMultiplier = 1.0;
+  int m_iUnisonAmount = 0;
+  double m_dUnisonDetune = 0.0;
 
   WaveType m_waveType;
   Wavetable* m_wavetable;
+};
+
+class LFOParams
+{
+public:
+  LFOMode m_mode = LFOMode::LFO_VOLUME;
+  bool m_bEnabled = false;
+  double m_dAmplitude = 0.0;
+  double m_dFreq = 0.0;
 };
 
 class SynthParams
@@ -30,6 +47,11 @@ public:
     {
       oscParams[i].reset(new OscParams);
     }
+
+    for (int i = 0; i < NUM_LFO; i++)
+    {
+      lfoParams[i].reset(new LFOParams);
+    }
   }
 
   std::shared_ptr<OscParams> GetOscParams(int oscNum)
@@ -37,9 +59,15 @@ public:
     return oscParams[oscNum];
   }
 
+  std::shared_ptr<LFOParams> GetLFOParams(int lfoNum)
+  {
+    return lfoParams[lfoNum];
+  }
+
 public:
   const std::unique_ptr<Envelope> ampEnv = std::make_unique<Envelope>();
 
 private:
   std::shared_ptr<OscParams> oscParams[NUM_OSCILLATORS];
+  std::shared_ptr<LFOParams> lfoParams[NUM_LFO];
 };

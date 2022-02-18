@@ -318,7 +318,6 @@
     <ClInclude Include="..\..\..\IPlug\IPlug_include_in_plug_src.h" />
     <ClInclude Include="..\DSP.h" />
     <ClInclude Include="..\Envelope.h" />
-    <ClInclude Include="..\KLFO.h" />
     <ClInclude Include="..\KOscillator.h" />
     <ClInclude Include="..\KSynth.h" />
     <ClInclude Include="..\resources\resource.h" />

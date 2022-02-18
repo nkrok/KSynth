@@ -22,10 +22,10 @@ enum EParams
   kEnvSustain,
   kEnvRelease,
 
-  kLFOEnabled,
-  kLFOMode,
-  kLFOAmp,
-  kLFORate,
+  kLFO1Enabled,
+  kLFO1Mode,
+  kLFO1Amp,
+  kLFO1Rate,
 
   kOsc1Pan,
   kOsc2Pan,
