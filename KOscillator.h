@@ -9,6 +9,7 @@ public:
   {
     double out[2] = { 0.0 };
     double freq = inputFreq * m_oscParams->m_dFreqMultiplier;
+    Wavetable *wt = m_oscParams->m_wavetable;
 
     if (m_oscParams->m_waveType == WaveType::NOISE)
     {
@@ -20,11 +21,25 @@ public:
       for (int i = 0; i < m_oscParams->m_iUnisonAmount + 1; i++)
       {
         double unisonFreq = freq * pow(2.0, m_oscParams->m_dUnisonDetune * (100.0 / std::max(1, m_oscParams->m_iUnisonAmount) * i) / 1200.0);
-        double increment = unisonFreq * m_oscParams->m_wavetable->m_iWavetableSize / sampleRate;
-        double phase = m_dPhase[i];
-        m_dPhase[i] = std::fmod(phase + increment, m_oscParams->m_wavetable->m_iWavetableSize);
 
-        double wtOut = m_oscParams->m_wavetable->GetWavetable()[(int)phase];
+        double increment = unisonFreq * wt->m_iWavetableSize / sampleRate;
+        m_dPhase[i] = std::fmod(m_dPhase[i] + increment, wt->m_iWavetableSize);
+
+        double wtData[2];
+        uint32_t readIndex[2];
+
+        double intPart;
+        double fracPart = std::modf(m_dPhase[i], &intPart);
+        readIndex[0] = (uint32_t) intPart;
+        readIndex[1] = (readIndex[0] + 1) & wt->m_wrapMask;
+
+        wtData[0] = wt->GetWavetable()[readIndex[0]];
+        wtData[1] = wt->GetWavetable()[readIndex[1]];
+
+        // Linearly interpolate the two table values
+        double wtOut = (wtData[1] - wtData[0]) * fracPart + wtData[0];
+
+        // Scale amplitude based on number of unison voices?? (not sure if I should be doing this)
         out[0] += wtOut / (m_oscParams->m_iUnisonAmount + 1);
         out[1] += wtOut / (m_oscParams->m_iUnisonAmount + 1);
       }

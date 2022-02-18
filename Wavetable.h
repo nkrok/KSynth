@@ -22,6 +22,7 @@ public:
   {
     m_iWavetableSize = size;
     m_wavetable = std::vector(size, 0.0F);
+    m_wrapMask = size - 1;
   }
 
   std::vector<float>& GetWavetable()
@@ -30,7 +31,8 @@ public:
   }
 
 public:
-  int m_iWavetableSize;
+  uint32_t m_iWavetableSize;
+  uint32_t m_wrapMask;
 
 private:
   std::vector<float> m_wavetable;
