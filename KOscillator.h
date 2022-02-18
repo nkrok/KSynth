@@ -20,7 +20,7 @@ public:
       // Apply unison and detune
       for (int i = 0; i < m_oscParams->m_iUnisonAmount + 1; i++)
       {
-        double unisonFreq = freq * pow(2.0, m_oscParams->m_dUnisonDetune * (100.0 / std::max(1, m_oscParams->m_iUnisonAmount) * i) / 1200.0);
+        double unisonFreq = freq * std::pow(2.0, m_oscParams->m_dUnisonDetune * m_oscParams->m_unisonDetuneFactors[i] * 100.0 / 1200.0);
 
         double increment = unisonFreq * wt->m_iWavetableSize / sampleRate;
         m_dPhase[i] = std::fmod(m_dPhase[i] + increment, wt->m_iWavetableSize);
@@ -39,9 +39,9 @@ public:
         // Linearly interpolate the two table values
         double wtOut = (wtData[1] - wtData[0]) * fracPart + wtData[0];
 
-        // Scale amplitude based on number of unison voices?? (not sure if I should be doing this)
-        out[0] += wtOut / (m_oscParams->m_iUnisonAmount + 1);
-        out[1] += wtOut / (m_oscParams->m_iUnisonAmount + 1);
+        // Pan (creates stereo effect with detuned unison)
+        out[0] += wtOut * std::min(1.0, 1.0 - m_oscParams->m_unisonPanValues[i]);
+        out[1] += wtOut * std::min(1.0, 1.0 + m_oscParams->m_unisonPanValues[i]);
       }
     }
 

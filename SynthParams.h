@@ -22,11 +22,16 @@ public:
   double m_dGain = 0.0;
   double m_dPan = 0.0;
   double m_dFreqMultiplier = 1.0;
-  int m_iUnisonAmount = 0;
-  double m_dUnisonDetune = 0.0;
 
   WaveType m_waveType;
   Wavetable* m_wavetable;
+
+  int m_iUnisonAmount = 0;
+  double m_dUnisonDetune = 0.0;
+
+  double m_unisonDetuneFactors[MAX_UNISON] = { 0.0, 1.0, -1.0, 0.707 };
+  double m_unisonPanValues[MAX_UNISON] = { 0.0, -1.0, 1.0, -0.5 };
+  int m_unisonPhaseOffsets[MAX_UNISON] = { 0, 13, -13, 37 };
 };
 
 class LFOParams
