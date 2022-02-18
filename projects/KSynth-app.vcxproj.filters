@@ -260,6 +260,8 @@
     <ClInclude Include="..\Envelope.h" />
     <ClInclude Include="..\KLFO.h" />
     <ClInclude Include="..\Wavetable.h" />
+    <ClInclude Include="..\Voice.h" />
+    <ClInclude Include="..\SynthParams.h" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="resources">

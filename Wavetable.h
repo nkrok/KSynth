@@ -4,6 +4,17 @@ using namespace iplug;
 
 #define WAVETABLE_DEFAULT_SIZE 1024
 
+#define WAVE_TYPE_NAMES "sine", "square", "triangle", "saw", "noise"
+
+enum class WaveType {
+  SINE,
+  SQUARE,
+  TRIANGLE,
+  SAW,
+  NOISE,
+  NUM_WAVE_TYPES
+};
+
 class Wavetable
 {
 public:
@@ -96,6 +107,30 @@ public:
   Wavetable& GetSawWavetable()
   {
     return m_wtSaw;
+  }
+
+  Wavetable* GetWavetableFromWaveType(WaveType type)
+  {
+    switch (type)
+    {
+    case WaveType::SINE:
+      return &m_wtSine;
+
+    case WaveType::SQUARE:
+      return &m_wtSquare;
+
+    case WaveType::TRIANGLE:
+      return &m_wtTriangle;
+
+    case WaveType::SAW:
+      return &m_wtSaw;
+
+    case WaveType::NOISE:
+      return &m_wtSine;
+
+    default:
+      return &m_wtSine;
+    }
   }
 
 private:

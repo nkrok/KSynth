@@ -13,7 +13,7 @@ public:
 
   void SetAttack(double value)
   {
-    m_dAttack = value + 0.01; // Add 0.01 to attack so it doesn't pop when the value is 0
+    m_dAttack = value + 0.005; // Add 0.01 to attack so it doesn't pop when the value is 0
   }
 
   void SetDecay(double value)
