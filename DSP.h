@@ -1,6 +1,6 @@
 #pragma once
 
-#define NUM_VOICES 16
+#define NUM_VOICES 8
 #define NUM_OSCILLATORS 2
 #define MAX_UNISON 4
 #define NUM_LFO 2
@@ -17,17 +17,24 @@ class DSP
 public:
   DSP()
   {
+    m_defaultWavetables = std::make_shared<DefaultWavetables>(DefaultWavetables(m_iSampleRate));
+
     for (int i = 0; i < NUM_VOICES; i++)
     {
       m_voices[i].reset(new Voice(m_synthParams));
     }
 
-    //NoteOn(64, 0.5, 0);
+    int i = 0;
   }
 
   double* Process(double time)
   {
     double out[2] = { 0.0 };
+
+    if (m_voices[0]->m_bDormant)
+    {
+      //NoteOn(64, 0.5, time);
+    }
 
     for (int i = 0; i < NUM_VOICES; i++)
     {
@@ -57,6 +64,7 @@ public:
       if (m_voices[i]->m_iNoteNum == noteNum)
       {
         m_voices[i]->Release(time);
+        //return;
       }
     }
   }
@@ -182,5 +190,5 @@ private:
   int m_iNextVoice = 0;
 
   std::shared_ptr<SynthParams> m_synthParams = std::make_unique<SynthParams>();
-  std::shared_ptr<DefaultWavetables> m_defaultWavetables = std::make_unique<DefaultWavetables>();
+  std::shared_ptr<DefaultWavetables> m_defaultWavetables;
 };

@@ -27,7 +27,7 @@ public:
   {
     double out[2] = { 0.0 };
     double freq = m_dFreq;
-    double dAmp = GetAmplitude(time);
+    double dAmp = GetEnvelopeAmplitude(time);
 
     // LFO
     if (m_LFOParams[0]->m_bEnabled)
@@ -35,6 +35,9 @@ public:
       if (m_LFOParams[0]->m_mode == LFOMode::LFO_PITCH)
       {
         freq *= pow(2.0, m_osc[0].OscSin(m_LFOParams[0]->m_dFreq, time) * m_LFOParams[0]->m_dAmplitude);
+
+        for (int i = 0; i < NUM_OSCILLATORS; i++)
+          m_osc[i].SetFrequency(freq);
       }
       else if (m_LFOParams[0]->m_mode == LFOMode::LFO_VOLUME)
       {
@@ -48,7 +51,7 @@ public:
       if (!m_synthParams->GetOscParams(i)->m_bActive)
         continue;
 
-      double* oscOut = m_osc[i].Process(freq, sampleRate, time);
+      double* oscOut = m_osc[i].Process(sampleRate, time);
       out[0] += oscOut[0] * dAmp;
       out[1] += oscOut[1] * dAmp;
     }
@@ -56,7 +59,7 @@ public:
     return out;
   }
 
-  double GetAmplitude(double time) {
+  double GetEnvelopeAmplitude(double time) {
     double dAmp = m_synthParams->ampEnv->GetAmplitude(m_bActive, m_dActiveTime, time - m_dTriggerOnTime - m_dActiveTime, m_dPrevAmplitude);
 
     if (m_bActive)
@@ -87,6 +90,11 @@ public:
     m_dTriggerOnTime = time;
     m_dActiveTime = 0.0;
     m_dPrevAmplitude = 0.0;
+
+    for (int i = 0; i < NUM_OSCILLATORS; i++)
+    {
+      m_osc[i].NoteOn(m_dFreq);
+    }
   }
 
   void Release(double time)
