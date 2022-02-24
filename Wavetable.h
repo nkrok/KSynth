@@ -161,7 +161,7 @@ public:
       if (numHarmonics == numHarmonicsPrev)
       {
         //wt.SetWavetableForMidiNote(i, wt.GetWavetableForMidiNote(i - 1));
-        wt.ShareWavetables(i, i - 1);
+        wt.ShareWavetables(i - 1, i);
         continue;
       }
 
