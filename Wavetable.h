@@ -47,6 +47,11 @@ public:
     m_pWavetables[noteId] = p_wtVector;
   }
 
+  void ShareWavetables(int srcNote, int destNote)
+  {
+    m_pWavetables[destNote] = m_pWavetables[srcNote];
+  }
+
 public:
   uint32_t m_iWavetableSize;
   uint32_t m_wrapMask;
@@ -155,7 +160,8 @@ public:
       // If the number of harmonics is the same as the previous note, just reuse the wavetable
       if (numHarmonics == numHarmonicsPrev)
       {
-        wt.SetWavetableForMidiNote(i, wt.GetWavetableForMidiNote(i - 1));
+        //wt.SetWavetableForMidiNote(i, wt.GetWavetableForMidiNote(i - 1));
+        wt.ShareWavetables(i, i - 1);
         continue;
       }
 
